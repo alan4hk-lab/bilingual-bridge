@@ -1,1134 +1,561 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BilingualBridge: Family Connect</title>
-    <!-- Tailwind CSS CDN -->
+    <!-- Tailwind CSS for modern responsive styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        brand: {
-                            50: '#fdf4f2',
-                            100: '#fbe8e5',
-                            500: '#e06d53',
-                            600: '#c85338',
-                            700: '#a74028',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Custom smooth transitions and scrollbar */
-        * { scroll-behavior: smooth; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .tab-transition { transition: all 0.3s ease; }
     </style>
 </head>
-<body class="h-full bg-slate-50 text-slate-800 font-sans antialiased flex flex-col min-h-screen">
+<body class="bg-gradient-to-br from-orange-50 via-rose-50 to-amber-50 min-h-screen text-gray-800 flex flex-col">
 
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3 cursor-pointer" onclick="app.switchView('home')">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-brand-500 flex items-center justify-center text-white font-bold text-xl shadow-md">
-                    <i class="fa-solid fa-hands-bound text-white"></i>
-                </div>
-                <div>
-                    <h1 class="font-bold text-lg leading-tight bg-gradient-to-r from-amber-600 to-brand-600 bg-clip-text text-transparent">BilingualBridge</h1>
-                    <p class="text-xs text-slate-500 font-medium">Family Connect 🇭🇰 🇳🇵</p>
-                </div>
+    <!-- Top Navigation Header -->
+    <header class="bg-white/80 backdrop-blur-md border-b border-rose-100 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2 cursor-pointer" onclick="switchView('home')">
+                <span class="text-2xl">🌉</span>
+                <span class="font-bold text-lg bg-gradient-to-r from-rose-600 to-amber-600 bg-clip-text text-transparent">BilingualBridge</span>
             </div>
-
-            <!-- Navigation & Track Switcher -->
-            <div class="flex items-center space-x-2 sm:space-x-4">
-                <div id="active-track-badge" class="hidden sm:flex items-center px-3 py-1 bg-amber-50 border border-amber-200 rounded-full text-xs font-semibold text-amber-800">
-                    <i class="fa-solid fa-book-open mr-1.5"></i> <span id="nav-track-name">No Track Selected</span>
-                </div>
-                <button onclick="app.switchView('home')" class="px-3 py-1.5 text-xs sm:text-sm font-medium text-slate-600 hover:text-brand-600 rounded-lg hover:bg-slate-100 transition">
-                    <i class="fa-solid fa-house mr-1"></i> Home
-                </button>
-                <button onclick="app.switchView('games')" class="px-3 py-1.5 text-xs sm:text-sm font-medium text-slate-600 hover:text-brand-600 rounded-lg hover:bg-slate-100 transition">
-                    <i class="fa-solid fa-gamepad mr-1"></i> Games
-                </button>
-                <button onclick="app.openResetModal()" class="p-2 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition" title="Reset Progress">
-                    <i class="fa-solid fa-rotate-right"></i>
-                </button>
+            <div id="header-nav" class="hidden flex items-center space-x-3">
+                <button onclick="switchView('dashboard')" class="text-sm font-medium text-gray-600 hover:text-rose-600 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-rose-50 transition">Dashboard</button>
+                <button onclick="switchView('home')" class="text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 px-3 py-1.5 rounded-lg transition shadow-sm">Switch Track</button>
             </div>
         </div>
     </header>
 
-    <main class="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <!-- Main Container -->
+    <main class="flex-grow max-w-4xl w-full mx-auto px-4 py-6">
 
-        <!-- VIEW 1: HOME SCREEN (Dual Track Selection) -->
-        <div id="view-home" class="view-section space-y-8">
-            <!-- Welcome Banner -->
-            <div class="bg-gradient-to-r from-brand-600 via-amber-600 to-amber-700 rounded-2xl p-6 sm:p-10 text-white shadow-xl relative overflow-hidden">
-                <div class="absolute -right-10 -bottom-10 opacity-10 text-9xl">
-                    <i class="fa-solid fa-heart"></i>
+        <!-- VIEW 1: HOME / TRACK SELECTION -->
+        <section id="view-home" class="space-y-8 py-4">
+            <div class="text-center space-y-3 max-w-xl mx-auto">
+                <span class="bg-rose-100 text-rose-700 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">Cross-Cultural Family Connect</span>
+                <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900">Connecting Hearts Across Languages</h1>
+                <p class="text-gray-600 text-sm md:text-base">Designed for our family meeting in November 2026. Choose your learning track below to master conversational fluency in 6 weeks.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+                <!-- Nepali Track (For Husband) -->
+                <div onclick="selectTrack('nepali')" class="bg-white rounded-2xl p-6 border-2 border-transparent hover:border-rose-400 shadow-md hover:shadow-xl transition-all cursor-pointer group flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition">🇳🇵</div>
+                        <h2 class="text-xl font-bold text-gray-900 group-hover:text-rose-600 transition">Learn Nepali</h2>
+                        <p class="text-xs text-orange-600 font-semibold mt-1">For Husband (Conversational Survival & Family)</p>
+                        <p class="text-gray-500 text-sm mt-3">Master greetings, family titles, food phrases, and polite expressions with Devanagari script & phonetics.</p>
+                    </div>
+                    <div class="mt-6 flex items-center text-sm font-semibold text-rose-600">
+                        Start Nepali Track <span class="ml-2 group-hover:translate-x-1 transition">→</span>
+                    </div>
                 </div>
-                <div class="relative z-10 max-w-2xl">
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-white/20 backdrop-blur-md mb-4 text-white">
-                        <i class="fa-regular fa-calendar-days mr-1.5"></i> Target: Family Meeting Nov 2026
-                    </span>
-                    <h2 class="text-2xl sm:text-4xl font-bold tracking-tight mb-3">Connecting Two Homes, One Heart 🇭🇰 ❤️ 🇳🇵</h2>
-                    <p class="text-white/90 text-sm sm:text-base leading-relaxed mb-6">
-                        Welcome to BilingualBridge! Designed specifically for our cross-cultural family. Master conversational Nepali or Cantonese over 6 structured weeks with pronunciation guides, audio, and fun practice games.
-                    </p>
-                    <div class="flex flex-wrap gap-3">
-                        <button onclick="app.selectTrack('nepali')" class="bg-white text-brand-700 font-semibold px-5 py-2.5 rounded-xl shadow hover:bg-amber-50 transition flex items-center">
-                            <span class="text-lg mr-2">🇳🇵</span> Learn Nepali (For Husband) <i class="fa-solid fa-arrow-right ml-2 text-xs"></i>
-                        </button>
-                        <button onclick="app.selectTrack('cantonese')" class="bg-slate-900/40 backdrop-blur-md text-white border border-white/30 font-semibold px-5 py-2.5 rounded-xl hover:bg-slate-900/60 transition flex items-center">
-                            <span class="text-lg mr-2">🇭🇰</span> Learn Cantonese (For Wife) <i class="fa-solid fa-arrow-right ml-2 text-xs"></i>
-                        </button>
+
+                <!-- Cantonese Track (For Wife) -->
+                <div onclick="selectTrack('cantonese')" class="bg-white rounded-2xl p-6 border-2 border-transparent hover:border-rose-400 shadow-md hover:shadow-xl transition-all cursor-pointer group flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition">🇭🇰</div>
+                        <h2 class="text-xl font-bold text-gray-900 group-hover:text-rose-600 transition">Learn Cantonese</h2>
+                        <p class="text-xs text-rose-600 font-semibold mt-1">For Wife (Smooth Communication with Family)</p>
+                        <p class="text-gray-500 text-sm mt-3">Learn essential Hong Kong Cantonese terms with Traditional Chinese characters and Jyutping guides.</p>
+                    </div>
+                    <div class="mt-6 flex items-center text-sm font-semibold text-rose-600">
+                        Start Cantonese Track <span class="ml-2 group-hover:translate-x-1 transition">→</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 2: DASHBOARD & CURRICULUM -->
+        <section id="view-dashboard" class="hidden space-y-6">
+            <!-- User Status Header -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-rose-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div class="flex items-center space-x-4">
+                    <div id="track-avatar" class="w-14 h-14 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center text-2xl shadow-inner">🇳🇵</div>
+                    <div>
+                        <span id="track-badge" class="text-xs font-bold uppercase tracking-wider text-rose-600">Active Track</span>
+                        <h2 id="track-title" class="text-2xl font-bold text-gray-900">Nepali Learning Track</h2>
+                        <p class="text-xs text-gray-500">Target: Late November 2026 Family Gathering</p>
+                    </div>
+                </div>
+                <!-- Stats Box -->
+                <div class="flex items-center space-x-4 bg-orange-50 px-4 py-2.5 rounded-xl border border-orange-100">
+                    <div class="text-center">
+                        <span class="block text-xl font-black text-orange-600" id="stat-streak">🔥 1</span>
+                        <span class="text-[10px] text-gray-500 uppercase tracking-wide font-semibold">Streak</span>
+                    </div>
+                    <div class="w-px h-8 bg-orange-200"></div>
+                    <div class="text-center">
+                        <span class="block text-xl font-black text-rose-600" id="stat-completed">0/6</span>
+                        <span class="text-[10px] text-gray-500 uppercase tracking-wide font-semibold">Weeks Done</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Dashboard Summary Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
-                    <div class="w-12 h-12 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center text-xl">
-                        <i class="fa-solid fa-fire"></i>
-                    </div>
-                    <div>
-                        <p class="text-xs font-medium text-slate-500">Daily Streak</p>
-                        <h3 class="text-2xl font-bold text-slate-800"><span id="stat-streak">0</span> Days</h3>
-                    </div>
-                </div>
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
-                    <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl">
-                        <i class="fa-solid fa-circle-check"></i>
-                    </div>
-                    <div>
-                        <p class="text-xs font-medium text-slate-500">Completed Lessons</p>
-                        <h3 class="text-2xl font-bold text-slate-800"><span id="stat-completed">0</span> / 12</h3>
-                    </div>
-                </div>
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
-                    <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-xl">
-                        <i class="fa-solid fa-chart-line"></i>
-                    </div>
-                    <div>
-                        <p class="text-xs font-medium text-slate-500">Overall Progress</p>
-                        <h3 class="text-2xl font-bold text-slate-800"><span id="stat-progress">0</span>%</h3>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Track Selection Cards -->
-            <div>
-                <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center">
-                    <i class="fa-solid fa-route text-brand-600 mr-2"></i> Choose Your Learning Track
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Nepali Track Card -->
-                    <div onclick="app.selectTrack('nepali')" class="bg-white rounded-2xl border-2 border-slate-200 hover:border-brand-500 p-6 shadow-sm hover:shadow-md transition cursor-pointer group flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center justify-between mb-4">
-                                <span class="px-3 py-1 bg-rose-50 text-brand-700 font-bold text-xs rounded-full">Husband's Track</span>
-                                <span class="text-3xl">🇳🇵</span>
-                            </div>
-                            <h4 class="text-xl font-bold text-slate-800 group-hover:text-brand-600 transition mb-2">Learn Nepali (नेपाली)</h4>
-                            <p class="text-slate-600 text-sm mb-4">Master basic conversational Nepali in 6 weeks to warmly greet and chat with family members at the November gathering.</p>
-                            <div class="space-y-2 mb-6">
-                                <div class="flex items-center text-xs text-slate-500"><i class="fa-solid fa-check text-emerald-500 mr-2"></i> Devanagari script & romanized guide</div>
-                                <div class="flex items-center text-xs text-slate-500"><i class="fa-solid fa-check text-emerald-500 mr-2"></i> Family titles & respectful pronouns</div>
-                                <div class="flex items-center text-xs text-slate-500"><i class="fa-solid fa-check text-emerald-500 mr-2"></i> Food, greetings & courtesy phrases</div>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between pt-4 border-t border-slate-100">
-                            <span class="text-xs font-semibold text-slate-500" id="nepali-track-progress">Progress: 0%</span>
-                            <span class="text-sm font-bold text-brand-600 flex items-center group-hover:translate-x-1 transition">Start Learning <i class="fa-solid fa-arrow-right ml-1"></i></span>
-                        </div>
-                    </div>
-
-                    <!-- Cantonese Track Card -->
-                    <div onclick="app.selectTrack('cantonese')" class="bg-white rounded-2xl border-2 border-slate-200 hover:border-amber-500 p-6 shadow-sm hover:shadow-md transition cursor-pointer group flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center justify-between mb-4">
-                                <span class="px-3 py-1 bg-amber-50 text-amber-700 font-bold text-xs rounded-full">Wife's Track</span>
-                                <span class="text-3xl">🇭🇰</span>
-                            </div>
-                            <h4 class="text-xl font-bold text-slate-800 group-hover:text-amber-600 transition mb-2">Learn Cantonese (廣東話)</h4>
-                            <p class="text-slate-600 text-sm mb-4">Master conversational Cantonese to communicate smoothly and affectionately with husband's family in Hong Kong.</p>
-                            <div class="space-y-2 mb-6">
-                                <div class="flex items-center text-xs text-slate-500"><i class="fa-solid fa-check text-emerald-500 mr-2"></i> Traditional Chinese characters & Jyutping</div>
-                                <div class="flex items-center text-xs text-slate-500"><i class="fa-solid fa-check text-emerald-500 mr-2"></i> Daily survival & market phrases</div>
-                                <div class="flex items-center text-xs text-slate-500"><i class="fa-solid fa-check text-emerald-500 mr-2"></i> Respectful family titles & dim sum ordering</div>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between pt-4 border-t border-slate-100">
-                            <span class="text-xs font-semibold text-slate-500" id="cantonese-track-progress">Progress: 0%</span>
-                            <span class="text-sm font-bold text-amber-600 flex items-center group-hover:translate-x-1 transition">Start Learning <i class="fa-solid fa-arrow-right ml-1"></i></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- VIEW 2: CURRICULUM OVERVIEW (6 Weeks) -->
-        <div id="view-curriculum" class="view-section hidden space-y-6">
-            <!-- Header bar -->
-            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <!-- Quick Action Mini-Games Banner -->
+            <div class="bg-gradient-to-r from-rose-500 to-amber-500 rounded-2xl p-6 text-white shadow-md flex flex-col md:flex-row justify-between items-center gap-4">
                 <div>
-                    <button onclick="app.switchView('home')" class="text-xs font-semibold text-brand-600 hover:underline mb-1 inline-flex items-center">
-                        <i class="fa-solid fa-arrow-left mr-1"></i> Back to Tracks
-                    </button>
-                    <h2 id="curriculum-title" class="text-2xl font-bold text-slate-800">Learning Track</h2>
-                    <p id="curriculum-subtitle" class="text-slate-500 text-sm">6-Week Structured Survival Curriculum</p>
+                    <h3 class="text-lg font-bold">Practice & Test Your Skills</h3>
+                    <p class="text-rose-100 text-xs mt-0.5">Reinforce what you learned with interactive flashcard matching and audio challenges.</p>
                 </div>
-                <div class="flex items-center space-x-3 w-full sm:w-auto">
-                    <div class="flex-grow sm:w-48 bg-slate-100 rounded-full h-3 overflow-hidden">
-                        <div id="track-progress-bar" class="bg-brand-600 h-full w-0 transition-all duration-500"></div>
-                    </div>
-                    <span id="track-progress-text" class="text-sm font-bold text-slate-700 whitespace-nowrap">0%</span>
+                <div class="flex space-x-3 w-full md:w-auto">
+                    <button onclick="startMiniGame('flashcards')" class="flex-1 md:flex-none bg-white text-rose-600 font-semibold px-4 py-2 rounded-xl text-xs hover:bg-rose-50 transition shadow">🃏 Match Cards</button>
+                    <button onclick="startMiniGame('audio')" class="flex-1 md:flex-none bg-white/20 hover:bg-white/30 text-white font-semibold px-4 py-2 rounded-xl text-xs transition border border-white/30">🎧 Listen & Choose</button>
                 </div>
             </div>
 
-            <!-- Weeks List -->
-            <div id="weeks-container" class="space-y-4">
-                <!-- Dynamically populated weeks -->
+            <!-- 6-Week Curriculum Section -->
+            <div class="space-y-4">
+                <h3 class="text-lg font-bold text-gray-800 px-1">6-Week Structured Curriculum</h3>
+                <div id="weeks-container" class="space-y-3">
+                    <!-- Dynamic Weeks Rendered Here -->
+                </div>
             </div>
-        </div>
+        </section>
 
         <!-- VIEW 3: LESSON DETAIL VIEW -->
-        <div id="view-lesson" class="view-section hidden space-y-6">
-            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <button onclick="app.openCurriculum()" class="text-xs font-semibold text-brand-600 hover:underline mb-1 inline-flex items-center">
-                        <i class="fa-solid fa-arrow-left mr-1"></i> Back to Weeks
-                    </button>
-                    <h2 id="lesson-header-title" class="text-xl sm:text-2xl font-bold text-slate-800">Lesson Title</h2>
-                    <p id="lesson-header-desc" class="text-slate-500 text-sm">Practice vocabulary and phrases</p>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <button onclick="app.startQuizForCurrentLesson()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-xl text-sm transition shadow flex items-center">
-                        <i class="fa-solid fa-gamepad mr-2"></i> Practice Mini-Game
-                    </button>
-                    <button id="lesson-complete-btn" onclick="app.toggleCurrentLessonComplete()" class="px-4 py-2 bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 font-semibold rounded-xl text-sm transition border border-slate-200">
-                        <i class="fa-regular fa-circle mr-1.5"></i> Mark Complete
-                    </button>
-                </div>
-            </div>
-
-            <!-- Vocabulary Cards Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="vocab-cards-container">
-                <!-- Dynamically populated vocabulary cards -->
-            </div>
-
-            <div class="flex justify-between pt-4">
-                <button onclick="app.openCurriculum()" class="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 transition text-sm">
-                    <i class="fa-solid fa-arrow-left mr-2"></i> Back to Curriculum
+        <section id="view-lesson" class="hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <button onclick="switchView('dashboard')" class="text-xs font-semibold bg-white border border-gray-200 px-3 py-2 rounded-xl hover:bg-gray-50 transition flex items-center space-x-1">
+                    <span>← Back to Dashboard</span>
                 </button>
-                <button onclick="app.startQuizForCurrentLesson()" class="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl transition text-sm shadow">
-                    Test Your Knowledge <i class="fa-solid fa-arrow-right ml-2"></i>
+                <span id="lesson-week-badge" class="text-xs font-bold bg-rose-100 text-rose-700 px-3 py-1 rounded-full">Week 1</span>
+            </div>
+
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-rose-100 space-y-2">
+                <h2 id="lesson-title" class="text-2xl font-bold text-gray-900">Lesson Topic</h2>
+                <p id="lesson-desc" class="text-sm text-gray-600">Practical survival phrases and conversational sentences.</p>
+            </div>
+
+            <!-- Phrases List -->
+            <div id="phrases-container" class="space-y-3">
+                <!-- Rendered dynamically -->
+            </div>
+
+            <div class="pt-4 flex justify-end">
+                <button onclick="completeCurrentWeek()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl text-sm shadow-md transition flex items-center space-x-2">
+                    <span>✅ Mark Week Completed</span>
                 </button>
             </div>
-        </div>
+        </section>
 
-        <!-- VIEW 4: MINI-GAMES DASHBOARD & PLAY -->
-        <div id="view-games" class="view-section hidden space-y-6">
-            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h2 class="text-2xl font-bold text-slate-800"><i class="fa-solid fa-gamepad text-amber-500 mr-2"></i> Interactive Mini-Games</h2>
-                    <p class="text-slate-500 text-sm">Reinforce your memory with Match-the-Meaning and Listen & Choose quiz games.</p>
-                </div>
-                <div class="flex items-center space-x-2">
-                    <select id="game-track-select" onchange="app.updateGameTrackSelection()" class="px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:outline-none focus:border-brand-500">
-                        <option value="nepali">🇳🇵 Nepali Track</option>
-                        <option value="cantonese">🇭🇰 Cantonese Track</option>
-                    </select>
-                </div>
+        <!-- VIEW 4: MINI-GAMES -->
+        <section id="view-minigame" class="hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <button onclick="switchView('dashboard')" class="text-xs font-semibold bg-white border border-gray-200 px-3 py-2 rounded-xl hover:bg-gray-50 transition">← Exit Mini-Game</button>
+                <h2 id="game-header-title" class="font-bold text-gray-800">Mini-Game Challenge</h2>
             </div>
-
-            <!-- Game Selection Grid -->
-            <div id="game-menu" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Match the meaning card -->
-                <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition flex flex-col justify-between">
-                    <div>
-                        <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-xl mb-4">
-                            <i class="fa-solid fa-clone"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-800 mb-2">Match-the-Meaning</h3>
-                        <p class="text-slate-600 text-sm mb-6">Test your recall by matching target phrases in Nepali/Cantonese with their English meanings and phonetic guides.</p>
-                    </div>
-                    <button onclick="app.startMatchGame()" class="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl transition text-sm shadow">
-                        Play Match Game <i class="fa-solid fa-arrow-right ml-2"></i>
-                    </button>
-                </div>
-
-                <!-- Listen & Choose card -->
-                <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition flex flex-col justify-between">
-                    <div>
-                        <div class="w-12 h-12 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center text-xl mb-4">
-                            <i class="fa-solid fa-headphones"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-800 mb-2">Listen & Choose Quiz</h3>
-                        <p class="text-slate-600 text-sm mb-6">Listen to audio pronunciation prompts or study the phrase and pick the correct English translation from 4 choices.</p>
-                    </div>
-                    <button onclick="app.startListenGame()" class="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-xl transition text-sm shadow">
-                        Play Listen & Choose <i class="fa-solid fa-arrow-right ml-2"></i>
-                    </button>
-                </div>
+            <div id="game-content" class="bg-white rounded-2xl p-6 shadow-sm border border-rose-100 min-h-[350px] flex flex-col justify-center">
+                <!-- Dynamically populated game content -->
             </div>
-
-            <!-- Active Game Container -->
-            <div id="game-active-container" class="hidden bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
-                <!-- Dynamic game interface injected here -->
-            </div>
-        </div>
+        </section>
 
     </main>
 
-    <footer class="bg-white border-t border-slate-200 mt-auto py-6">
-        <div class="max-w-6xl mx-auto px-4 text-center text-xs text-slate-500 space-y-2">
-            <p>BilingualBridge: Family Connect &bull; Built with love for the November 2026 Hong Kong-Nepal Family Reunion</p>
-            <p class="text-slate-400">Features Web Speech API audio synthesis &bull; Local progress persistence</p>
-        </div>
+    <!-- Footer -->
+    <footer class="text-center py-6 text-xs text-gray-400">
+        BilingualBridge: Family Connect &bull; Built with love for Hong Kong & Nepal 🇭🇰🇳🇵
     </footer>
 
-    <div id="reset-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center text-xl mx-auto">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-            </div>
-            <h3 class="text-lg font-bold text-slate-800 text-center">Reset Learning Progress?</h3>
-            <p class="text-sm text-slate-600 text-center">This will clear all completed lessons, daily streaks, and saved progress from your browser. This action cannot be undone.</p>
-            <div class="flex space-x-3 pt-2">
-                <button onclick="app.closeResetModal()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 font-semibold rounded-xl text-sm text-slate-700 transition">Cancel</button>
-                <button onclick="app.confirmReset()" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 font-semibold rounded-xl text-sm text-white transition shadow">Yes, Reset</button>
-            </div>
-        </div>
-    </div>
-
+    <!-- JavaScript Data & Logic -->
     <script>
-        const CURRICULUM_DATA = {
+        // CURRICULUM DATA
+        const curriculum = {
             nepali: {
-                title: "Learn Nepali (नेपाली)",
-                subtitle: "Husband's Track for November 2026 Family Meeting",
-                langCode: "ne-NP",
+                title: "Learn Nepali",
+                avatar: "🇳🇵",
+                badge: "Husband's Track",
                 weeks: [
                     {
                         week: 1,
-                        title: "Week 1: Warm Greetings & Courtesy",
-                        description: "Essential polite introductions, greetings, and pleasantries.",
-                        lessons: [
-                            {
-                                id: "ne_w1_l1",
-                                title: "Basic Greetings & Politeness",
-                                vocab: [
-                                    { target: "नमस्ते", phonetic: "Namaste", english: "Hello / Greetings", note: "Used universally with respect" },
-                                    { target: "चङ्गा हुनुहुन्छ?", phonetic: "Changa hunuhunchha?", english: "How are you?", note: "Respectful form" },
-                                    { target: "म सञ्चै छु", phonetic: "Ma sanchai chu", english: "I am fine / well", note: "Standard reply" },
-                                    { target: "धन्यवाद", phonetic: "Dhanyabad", english: "Thank you", note: "Appreciation" },
-                                    { target: "फेरि भेटौंला", phonetic: "Feri bhetaula", english: "See you again", note: "Parting phrase" }
-                                ]
-                            },
-                            {
-                                id: "ne_w1_l2",
-                                title: "Courtesy & Apologies",
-                                vocab: [
-                                    { target: "कृपया", phonetic: "Kripaya", english: "Please", note: "Polite request" },
-                                    { target: "माफ गर्नुहोस", phonetic: "Map garnuhos", english: "Sorry / Excuse me", note: "Apology" },
-                                    { target: "केही छैन", phonetic: "Kehi chhaina", english: "You're welcome / No problem", note: "Response to thank you" },
-                                    { target: "शुभ दिन", phonetic: "Subha din", english: "Good day / Have a nice day", note: "Wishing well" }
-                                ]
-                            }
+                        title: "Essential Greetings & Polite Expressions",
+                        desc: "Break the ice and greet family members respectfully.",
+                        phrases: [
+                            { native: "नमस्ते", phonetic: "Namaste", cantonesePhonetic: "Na-ma-ste", meaning: "Hello / Greetings" },
+                            { native: "तपाईलाई कस्तो छ?", phonetic: "Tapai lai kasto cha?", cantonesePhonetic: "Ta-pai-lai kas-to cha?", meaning: "How are you?" },
+                            { native: "मलाई सञ्चो छ, धन्यवाद", phonetic: "Malai sacho cha, dhanyabad", cantonesePhonetic: "Ma-lai san-cho cha, dan-ya-bad", meaning: "I am fine, thank you" },
+                            { native: "फेरी भेटौंला", phonetic: "Pheri bhetaula", cantonesePhonetic: "Phe-ri bhe-tau-la", meaning: "See you again" }
                         ]
                     },
                     {
                         week: 2,
-                        title: "Week 2: Family Titles & Respect",
-                        description: "Addressing parents, siblings, and in-laws respectfully.",
-                        lessons: [
-                            {
-                                id: "ne_w2_l1",
-                                title: "Immediate Family Titles",
-                                vocab: [
-                                    { target: "बुवा / बाबा", phonetic: "Buwa / Baba", english: "Father", note: "Respectful parental term" },
-                                    { target: "आमा / मुवा", phonetic: "Aama / Muwa", english: "Mother", note: "Maternal term" },
-                                    { target: "दाइ", phonetic: "Dai", english: "Older Brother", note: "Also used for elder male cousins" },
-                                    { target: "दिदी", phonetic: "Didi", english: "Older Sister", note: "Also used for elder female cousins" },
-                                    { target: "भाइ / बहिनि", phonetic: "Bhai / Bahini", english: "Younger Brother / Sister", note: "Junior siblings" }
-                                ]
-                            },
-                            {
-                                id: "ne_w2_l2",
-                                title: "Extended Family & In-Laws",
-                                vocab: [
-                                    { target: "सासु आमा", phonetic: "Sasu Aama", english: "Mother-in-law", note: "Respectful address" },
-                                    { target: "ससुरा बुवा", phonetic: "Sasura Buwa", english: "Father-in-law", note: "Respectful address" },
-                                    { target: "जेठान / साला", phonetic: "Jethan / Sala", english: "Brother-in-law", note: "Spouse's brother" },
-                                    { target: "परिवार", phonetic: "Paribar", english: "Family", note: "Core concept" }
-                                ]
-                            }
+                        title: "Family Titles & Relationships",
+                        desc: "Address family members warmly and correctly.",
+                        phrases: [
+                            { native: "बुवा / बाबा", phonetic: "Buwa / Baba", cantonesePhonetic: "Bu-wa / Ba-ba", meaning: "Father" },
+                            { native: "आमा", phonetic: "Aama", cantonesePhonetic: "Aa-ma", meaning: "Mother" },
+                            { native: "दाजु / दाइ", phonetic: "Daju / Dai", cantonesePhonetic: "Da-ju / Dai", meaning: "Older Brother" },
+                            { native: "दिदी", phonetic: "Didi", cantonesePhonetic: "Di-di", meaning: "Older Sister" }
                         ]
                     },
                     {
                         week: 3,
-                        title: "Week 3: Food, Dining & Hospitality",
-                        description: "Complimenting delicious meals and sharing tea/dal bhat.",
-                        lessons: [
-                            {
-                                id: "ne_w3_l1",
-                                title: "Meals & Delicacies",
-                                vocab: [
-                                    { target: "खाना", phonetic: "Khana", english: "Food / Meal", note: "General meal" },
-                                    { target: "भात र दाल", phonetic: "Bhat ra Dal", english: "Rice and Lentil Soup", note: "National dish" },
-                                    { target: "पानी", phonetic: "Pani", english: "Water", note: "Essential refreshment" },
-                                    { target: "चिया", phonetic: "Chiya", english: "Milk Tea (Chai)", note: "Hospitality staple" }
-                                ]
-                            },
-                            {
-                                id: "ne_w3_l2",
-                                title: "Complimenting Food",
-                                vocab: [
-                                    { target: "धेरै मीठो छ!", phonetic: "Dherai mitho chha!", english: "It is very delicious!", note: "Praising cooking" },
-                                    { target: "पेट भरियो", phonetic: "Pet bhariyo", english: "I am full", note: "After eating" },
-                                    { target: "मलाई खान मन छ", phonetic: "Malai khan man chha", english: "I would like to eat", note: "Desire" }
-                                ]
-                            }
+                        title: "Food, Dining & Compliments",
+                        desc: "Enjoy meals together and praise delicious home cooking.",
+                        phrases: [
+                            { native: "खाना मीठो छ", phonetic: "Khana mitho cha", cantonesePhonetic: "Kha-na mi-tho cha", meaning: "The food is delicious" },
+                            { native: "मलाई पानी चाहिन्छ", phonetic: "Malai pani chahinchha", cantonesePhonetic: "Ma-lai pa-ni cha-hin-cha", meaning: "I need water" },
+                            { native: "पेट भरियो, धन्यवाद", phonetic: "Pet bhariyo, dhanyabad", cantonesePhonetic: "Pet bha-ri-yo, dan-ya-bad", meaning: "I am full, thank you" },
+                            { native: "धेरै मीठो!", phonetic: "Dherai mitho!", cantonesePhonetic: "Dhe-rai mi-tho!", meaning: "Very delicious!" }
                         ]
                     },
                     {
                         week: 4,
-                        title: "Week 4: Numbers & Shopping",
-                        description: "Counting and handling market interactions in Kathmandu.",
-                        lessons: [
-                            {
-                                id: "ne_w4_l1",
-                                title: "Numbers 1 to 10",
-                                vocab: [
-                                    { target: "एक (1)", phonetic: "Ek", english: "One", note: "Number 1" },
-                                    { target: "दुई (2)", phonetic: "Dui", english: "Two", note: "Number 2" },
-                                    { target: "तीन (3)", phonetic: "Tin", english: "Three", note: "Number 3" },
-                                    { target: "चार (4)", phonetic: "Char", english: "Four", note: "Number 4" },
-                                    { target: "पाँच (5)", phonetic: "Paach", english: "Five", note: "Number 5" }
-                                ]
-                            },
-                            {
-                                id: "ne_w4_l2",
-                                title: "Shopping & Pricing",
-                                vocab: [
-                                    { target: "यसको कति हो?", phonetic: "Yasako kati ho?", english: "How much is this?", note: "Inquiring price" },
-                                    { target: "धेरै महँगो छ", phonetic: "Dherai mahango chha", english: "It is very expensive", note: "Bargaining" },
-                                    { target: "पैसा", phonetic: "Paisa", english: "Money / Currency", note: "Financial" }
-                                ]
-                            }
+                        title: "Numbers & Daily Shopping",
+                        desc: "Handle daily conversations, counting, and simple items.",
+                        phrases: [
+                            { native: "एक, दुई, तीन", phonetic: "Ek, dui, teen", cantonesePhonetic: "Ek, dui, tin", meaning: "One, two, three" },
+                            { native: "चार, पाँच, छ", phonetic: "Char, paanch, cha", cantonesePhonetic: "Char, panch, cha", meaning: "Four, five, six" },
+                            { native: "यसको मूल्य कति हो?", phonetic: "Yesko mulya kati ho?", cantonesePhonetic: "Yes-ko mul-ya ka-ti ho?", meaning: "How much does this cost?" },
+                            { native: "धैरे महँगो छ", phonetic: "Dherai mahango cha", cantonesePhonetic: "Dhe-rai ma-hang-go cha", meaning: "It is too expensive" }
                         ]
                     },
                     {
                         week: 5,
-                        title: "Week 5: Daily Conversation & Questions",
-                        description: "Asking how people are doing and talking about the day.",
-                        lessons: [
-                            {
-                                id: "ne_w5_l1",
-                                title: "Essential Questions",
-                                vocab: [
-                                    { target: "कहाँ?", phonetic: "Kaha?", english: "Where?", note: "Location query" },
-                                    { target: "कहिले?", phonetic: "Kahile?", english: "When?", note: "Time query" },
-                                    { target: "किन?", phonetic: "Kina?", english: "Why?", note: "Reason query" },
-                                    { target: "के भयो?", phonetic: "Ke bhayo?", english: "What happened?", note: "Inquiring" }
-                                ]
-                            },
-                            {
-                                id: "ne_w5_l2",
-                                title: "Home & Weather",
-                                vocab: [
-                                    { target: "घर", phonetic: "Ghar", english: "Home / House", note: "Dwelling" },
-                                    { target: "मौसम राम्रो छ", phonetic: "Mausam ramro chha", english: "The weather is nice", note: "Small talk" },
-                                    { target: "राम्रो दिन", phonetic: "Ramro din", english: "Good day / Beautiful day", note: "Greeting" }
-                                ]
-                            }
+                        title: "Daily Courtesy & Weather",
+                        desc: "Make small talk about the day and show politeness.",
+                        phrases: [
+                            { native: "कृपया मदद गर्नुहोस्", phonetic: "Kripaya madad garnuhos", cantonesePhonetic: "Kri-pa-ya ma-dad gar-nu-hos", meaning: "Please help me" },
+                            { native: "माफ गर्नुहोला", phonetic: "Maaf garnuhola", cantonesePhonetic: "Maaf gar-nu-ho-la", meaning: "I am sorry / Excuse me" },
+                            { native: "आज मौसम राम्रो छ", phonetic: "Aaj mausam ramro cha", cantonesePhonetic: "Aaj mau-sam ram-ro cha", meaning: "The weather is nice today" },
+                            { native: "शुभ रात्रि", phonetic: "Shubha ratri", cantonesePhonetic: "Shu-bha ra-tri", meaning: "Good night" }
                         ]
                     },
                     {
                         week: 6,
-                        title: "Week 6: Family Gathering Celebration",
-                        description: "Festive wishes, toasts, and heartfelt expressions.",
-                        lessons: [
-                            {
-                                id: "ne_w6_l1",
-                                title: "Festive Wishes",
-                                vocab: [
-                                    { target: "बधाई छ!", phonetic: "Badhai chha!", english: "Congratulations!", note: "Celebration" },
-                                    { target: "शुभकामना!", phonetic: "Subhkamana!", english: "Best wishes!", note: "Greetings" },
-                                    { target: "म खुसी छु", phonetic: "Ma khusi chu", english: "I am happy", note: "Emotion" }
-                                ]
-                            },
-                            {
-                                id: "ne_w6_l2",
-                                title: "Heartfelt Closing",
-                                vocab: [
-                                    { target: "हामी एक परिवार हौं", phonetic: "Hami ek paribar hau", english: "We are one family", note: "Bonding" },
-                                    { target: "तपाईलाई माया गर्छु", phonetic: "Tapailai maya garchu", english: "I love you / respect you", note: "Affection" },
-                                    { target: "फेरि भेटौला", phonetic: "Feri bhetaula", english: "See you again soon", note: "Warm farewell" }
-                                ]
-                            }
+                        title: "Family Meeting Celebration Phrases",
+                        desc: "Master heartfelt expressions for the November 2026 family reunion.",
+                        phrases: [
+                            { native: "परिवारलाई भेट्दा खुसी लाग्यो", phonetic: "Parivar lai bhetda khusi lagyo", cantonesePhonetic: "Pa-ri-var lai bhet-da khu-si lag-yo", meaning: "I am happy to meet the family" },
+                            { native: "सबैलाई शुभकामना!", phonetic: "Sabailai subhakamana!", cantonesePhonetic: "Sa-bai-lai su-bha-ka-ma-na!", meaning: "Best wishes to everyone!" },
+                            { native: "हामी एक परिवार हौं", phonetic: "Hami ek parivar hau", cantonesePhonetic: "Ha-mi ek pa-ri-var hau", meaning: "We are one family" },
+                            { native: "धन्यवाद सबैलाई", phonetic: "Dhanyabad sabailai", cantonesePhonetic: "Dan-ya-bad sa-bai-lai", meaning: "Thank you everyone" }
                         ]
                     }
                 ]
             },
             cantonese: {
-                title: "Learn Cantonese (廣東話)",
-                subtitle: "Wife's Track for Communicating with Husband's Family in HK",
-                langCode: "zh-HK",
+                title: "Learn Cantonese",
+                avatar: "🇭🇰",
+                badge: "Wife's Track",
                 weeks: [
                     {
                         week: 1,
-                        title: "Week 1: Warm Greetings & Courtesy",
-                        description: "Essential polite introductions, greetings, and pleasantries in Cantonese.",
-                        lessons: [
-                            {
-                                id: "ca_w1_l1",
-                                title: "Basic Greetings & Politeness",
-                                vocab: [
-                                    { target: "你好", phonetic: "Nei hou", english: "Hello", note: "Standard greeting" },
-                                    { target: "早晨", phonetic: "zou san", english: "Good morning", note: "Morning greeting" },
-                                    { target: "食咗飯未啊?", phonetic: "sik zo faan mei aa?", english: "Have you eaten yet?", note: "Classic HK greeting" },
-                                    { target: "多謝", phonetic: "do ze", english: "Thank you (for gifts/help)", note: "Appreciation" },
-                                    { target: "唔該", phonetic: "m goi", english: "Thank you (service/passing) / Please", note: "Polite courtesy" }
-                                ]
-                            },
-                            {
-                                id: "ca_w1_l2",
-                                title: "Apologies & Parting",
-                                vocab: [
-                                    { target: "對唔住", phonetic: "deoi m zyu", english: "Sorry", note: "Apology" },
-                                    { target: "唔好意思", phonetic: "m hou ji si", english: "Excuse me / Sorry to bother", note: "Polite interruption" },
-                                    { target: "拜拜", phonetic: "baai baai", english: "Bye-bye", note: "Informal parting" },
-                                    { target: "再見", phonetic: "zoi gin3", english: "Goodbye", note: "Formal parting" }
-                                ]
-                            }
+                        title: "Essential Greetings & Polite Expressions",
+                        desc: "Greet Hong Kong family members politely and naturally.",
+                        phrases: [
+                            { native: "你好", phonetic: "Néih hóu", cantonesePhonetic: "Néih hóu", meaning: "Hello" },
+                            { native: "早晨", phonetic: "Zóu sàhn", cantonesePhonetic: "Zóu sàhn", meaning: "Good morning" },
+                            { native: "唔該 / 多謝", phonetic: "M̀h gōi / Dō zeh", cantonesePhonetic: "M̀h gōi / Dō zeh", meaning: "Thank you (for service / gift)" },
+                            { native: "拜拜", phonetic: "Bāai bāai", cantonesePhonetic: "Bāai bāai", meaning: "Bye-bye" }
                         ]
                     },
                     {
                         week: 2,
-                        title: "Week 2: Family Titles & Respect",
-                        description: "Addressing parents-in-law, older and younger relatives in Hong Kong.",
-                        lessons: [
-                            {
-                                id: "ca_w2_l1",
-                                title: "Immediate Family Titles",
-                                vocab: [
-                                    { target: "爸爸", phonetic: "baa baa", english: "Father", note: "Dad" },
-                                    { target: "媽媽", phonetic: "maa maa", english: "Mother", note: "Mom" },
-                                    { target: "大佬 / 阿哥", phonetic: "daai lou / aa go", english: "Older Brother", note: "Brother" },
-                                    { target: "家姐 / 姐姐", phonetic: "gaa ze / ze ze", english: "Older Sister", note: "Sister" }
-                                ]
-                            },
-                            {
-                                id: "ca_w2_l2",
-                                title: "In-Laws & Elders",
-                                vocab: [
-                                    { target: "老爷 / 奶奶", phonetic: "lou je / naai naai", english: "Father-in-law / Mother-in-law", note: "Husband's parents" },
-                                    { target: "公公 / 婆婆", phonetic: "gung gung / po po", english: "Grandfather / Grandmother", note: "Elder grandparents" },
-                                    { target: "屋企人", phonetic: "uk kei jan", english: "Family members", note: "Loved ones" }
-                                ]
-                            }
+                        title: "Family Titles & Relationships",
+                        desc: "Address your husband's family members with proper respect.",
+                        phrases: [
+                            { native: "爸爸", phonetic: "Bàh bā", cantonesePhonetic: "Bàh bā", meaning: "Father" },
+                            { native: "媽媽", phonetic: "Màh mā", cantonesePhonetic: "Màh mā", meaning: "Mother" },
+                            { native: "大佬 / 阿哥", phonetic: "Daai lóu / Ā gō", cantonesePhonetic: "Daai lóu / Ā gō", meaning: "Older brother" },
+                            { native: "家姐", phonetic: "Gā jé", cantonesePhonetic: "Gā jé", meaning: "Older sister" }
                         ]
                     },
                     {
                         week: 3,
-                        title: "Week 3: Dim Sum, Food & Restaurant",
-                        description: "Ordering dim sum, drinks, and complimenting family cooking.",
-                        lessons: [
-                            {
-                                id: "ca_w3_l1",
-                                title: "Dim Sum & Tea",
-                                vocab: [
-                                    { target: "飲茶", phonetic: "jam ca", english: "Drink tea / Dim sum gathering", note: "Cultural tradition" },
-                                    { target: "蝦餃 / 燒賣", phonetic: "haa gaau / siu maai", english: "Shrimp dumpling / Pork dumpling", note: "Dim sum favorites" },
-                                    { target: "唔該斟茶", phonetic: "m goi zam ca", english: "Please pour tea", note: "Tea service" },
-                                    { target: "好味", phonetic: "hou mei", english: "Delicious / Tasty", note: "Complimenting food" }
-                                ]
-                            },
-                            {
-                                id: "ca_w3_l2",
-                                title: "Dining Hospitality",
-                                vocab: [
-                                    { target: "食多啲啦", phonetic: "sik do di la", english: "Eat a bit more!", note: "Hospitality host phrase" },
-                                    { target: "我飽喇", phonetic: "ngo baau la", english: "I am full", note: "Finished eating" },
-                                    { target: "埋單", phonetic: "maai daan", english: "Check, please / Bill", note: "Paying at restaurant" }
-                                ]
-                            }
+                        title: "Food, Dim Sum & Dining",
+                        desc: "Navigate Hong Kong restaurants and appreciate local meals.",
+                        phrases: [
+                            { native: "好味！", phonetic: "Hóu mei!", cantonesePhonetic: "Hóu mei!", meaning: "Delicious!" },
+                            { native: "唔該畀杯水", phonetic: "M̀h gōi béi būi séui", cantonesePhonetic: "M̀h gōi béi būi séui", meaning: "Please give me a cup of water" },
+                            { native: "飽喇，多謝", phonetic: "Báau laah, dō zeh", cantonesePhonetic: "Báau laah, dō zeh", meaning: "I'm full, thank you" },
+                            { native: "飲杯！", phonetic: "Yam būi!", cantonesePhonetic: "Yam būi!", meaning: "Cheers!" }
                         ]
                     },
                     {
                         week: 4,
-                        title: "Week 4: Numbers & Market Shopping",
-                        description: "Shopping in HK wet markets or supermarkets and asking prices.",
-                        lessons: [
-                            {
-                                id: "ca_w4_l1",
-                                title: "Numbers 1 to 10",
-                                vocab: [
-                                    { target: "一 (1)", phonetic: "jat1", english: "One", note: "Number 1" },
-                                    { target: "二 / 兩 (2)", phonetic: "ji6 / loeng5", english: "Two", note: "Number 2" },
-                                    { target: "三 (3)", phonetic: "saam1", english: "Three", note: "Number 3" },
-                                    { target: "四 (4)", phonetic: "sei3", english: "Four", note: "Number 4" },
-                                    { target: "五 (5)", phonetic: "ng5", english: "Five", note: "Number 5" }
-                                ]
-                            },
-                            {
-                                id: "ca_w4_l2",
-                                title: "Shopping & Pricing",
-                                vocab: [
-                                    { target: "呢个幾多錢啊？", phonetic: "nei go gei do cin aa?", english: "How much is this?", note: "Inquiring price" },
-                                    { target: "平啲啦", phonetic: "peng di la", english: "Cheaper please / Discount", note: "Bargaining" },
-                                    { target: "毫子 / 蚊", phonetic: "hou zi / man", english: "Cents / Dollar (HKD)", note: "Currency units" }
-                                ]
-                            }
+                        title: "Numbers & Shopping in HK",
+                        desc: "Handle daily shopping and markets in Hong Kong.",
+                        phrases: [
+                            { native: "一, 二, 三", phonetic: "Yāt, yih, sāam", cantonesePhonetic: "Yāt, yih, sāam", meaning: "One, two, three" },
+                            { native: "幾多錢呀？", phonetic: "Gíi dō chín a?", cantonesePhonetic: "Gíi dō chín a?", meaning: "How much is this?" },
+                            { native: "太貴啦", phonetic: "Taai gwai laah", cantonesePhonetic: "Taai gwai laah", meaning: "Too expensive" },
+                            { native: "平啲得唔得？", phonetic: "Pìh dī dāk ṁh dāk?", cantonesePhonetic: "Pìh dī dāk ṁh dāk?", meaning: "Can it be cheaper?" }
                         ]
                     },
                     {
                         week: 5,
-                        title: "Week 5: Directions & Daily Chat",
-                        description: "Navigating Hong Kong MTR, streets, and asking polite questions.",
-                        lessons: [
-                            {
-                                id: "ca_w5_l1",
-                                title: "Navigating & Locations",
-                                vocab: [
-                                    { target: "喺邊度？", phonetic: "hai bin dou?", english: "Where is it?", note: "Location" },
-                                    { target: "地鐵站", phonetic: "dei tit zaam", english: "MTR Station", note: "Transit" },
-                                    { target: "唔好意思，請問...", phonetic: "m hou ji si, cing man...", english: "Excuse me, may I ask...", note: "Polite inquiry" }
-                                ]
-                            },
-                            {
-                                id: "ca_w5_l2",
-                                title: "Weather & Well-being",
-                                vocab: [
-                                    { target: "今日天氣好好", phonetic: "gam jat tin hei hou hou", english: "Today the weather is very nice", note: "Small talk" },
-                                    { target: "攰唔攰啊？", phonetic: "gui m gui aa?", english: "Are you tired?", note: "Caring question" }
-                                ]
-                            }
+                        title: "Daily Courtesy & Directions",
+                        desc: "Get around Hong Kong and express daily courtesy.",
+                        phrases: [
+                            { native: "唔好意思", phonetic: "M̀h hóu yi si", cantonesePhonetic: "M̀h hóu yi si", meaning: "Excuse me / Sorry" },
+                            { native: "呢度係邊度？", phonetic: "Nī dou haih bīn dou?", cantonesePhonetic: "Nī dou haih bīn dou?", meaning: "Where is this place?" },
+                            { native: "唔該幫幫手", phonetic: "M̀h gōi bōng bōng sáu", cantonesePhonetic: "M̀h gōi bōng bōng sáu", meaning: "Please help" },
+                            { native: "拜拜，陣間見", phonetic: "Bāai bāai, zahn gān gin", cantonesePhonetic: "Bāai bāai, zahn gān gin", meaning: "Bye, see you later" }
                         ]
                     },
                     {
                         week: 6,
-                        title: "Week 6: Family Reunion Celebration",
-                        description: "Heartfelt wishes and celebrating togetherness in Hong Kong.",
-                        lessons: [
-                            {
-                                id: "ca_w6_l1",
-                                title: "Festive & Family Wishes",
-                                vocab: [
-                                    { target: "恭喜發財", phonetic: "gung hei faat coi", english: "Wishing you prosperity", note: "Blessing" },
-                                    { target: "身体健康", phonetic: "san tai gin hong", english: "Good health", note: "Health wish" },
-                                    { target: "開開心心", phonetic: "hoi hoi sam sam", english: "Happiness and joy", note: "Well wishes" }
-                                ]
-                            },
-                            {
-                                id: "ca_w6_l2",
-                                title: "Heartfelt Bond",
-                                vocab: [
-                                    { target: "一家人最緊要齊整", phonetic: "jat gaa jan zeoi gan jiu cai zing", english: "Family togetherness is most important", note: "Core value" },
-                                    { target: "我好鍾意你哋", phonetic: "ngo hou zung ji nei dei", english: "I really like / love you all", note: "Warm affection" },
-                                    { target: "下次再聚", phonetic: "haa ci zoi zeoi", english: "Gathering again next time", note: "Parting warmth" }
-                                ]
-                            }
+                        title: "Family Gathering Celebration Phrases",
+                        desc: "Heartfelt expressions for meeting the extended family.",
+                        phrases: [
+                            { native: "好開心見到大家", phonetic: "Hóu hōi sām gin dóu daai gā", cantonesePhonetic: "Hóu hōi sām gin dóu daai gā", meaning: "Happy to see everyone" },
+                            { native: "祝大家身體健康", phonetic: "Juk daai gā sān tái gin hōng", cantonesePhonetic: "Juk daai gā sān tái gin hōng", meaning: "Wishing everyone good health" },
+                            { native: "一家人", phonetic: "Yāt gā yàhn", cantonesePhonetic: "Yāt gā yàhn", meaning: "One family" },
+                            { native: "多謝晒", phonetic: "Dō zeh saai", cantonesePhonetic: "Dō zeh saai", meaning: "Thank you very much" }
                         ]
                     }
                 ]
             }
         };
 
-        class BilingualBridgeApp {
-            constructor() {
-                this.currentTrack = localStorage.getItem('bb_current_track') || 'nepali';
-                this.currentView = 'home';
-                this.currentLessonId = null;
-                this.completedLessons = JSON.parse(localStorage.getItem('bb_completed_lessons') || '[]');
-                this.streak = parseInt(localStorage.getItem('bb_streak') || '1');
-                this.lastActiveDate = localStorage.getItem('bb_last_date') || '';
-                
-                this.checkDailyStreak();
-                this.initSpeechSynth();
+        // APP STATE
+        let currentTrack = localStorage.getItem('bb_track') || 'nepali';
+        let completedWeeks = JSON.parse(localStorage.getItem('bb_completed_' + currentTrack) || '[]');
+        let streak = parseInt(localStorage.getItem('bb_streak') || '3');
+
+        // INITIALIZE APP
+        document.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('bb_track')) {
+                showDashboard();
+            } else {
+                switchView('home');
             }
+        });
 
-            initSpeechSynth() {
-                this.synth = window.speechSynthesis;
-            }
+        function switchView(viewName) {
+            ['home', 'dashboard', 'lesson', 'minigame'].forEach(v => {
+                document.getElementById(`view-${v}`).classList.add('hidden');
+            });
+            document.getElementById(`view-${viewName}`).classList.remove('hidden');
 
-            speak(text, langCode) {
-                if (!this.synth) {
-                    this.showToast("Speech synthesis not supported in this browser.");
-                    return;
-                }
-                this.synth.cancel(); // Stop any ongoing speech
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = langCode || (this.currentTrack === 'nepali' ? 'ne-NP' : 'zh-HK');
-                utterance.rate = 0.85; // Slightly slower for language learners
-                this.synth.speak(utterance);
-            }
-
-            showToast(message) {
-                const toast = document.createElement('div');
-                toast.className = 'fixed bottom-5 right-5 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl text-sm flex items-center space-x-2 animate-bounce';
-                toast.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> <span>${message}</span>`;
-                document.body.appendChild(toast);
-                setTimeout(() => toast.remove(), 3000);
-            }
-
-            checkDailyStreak() {
-                const today = new Date().toDateString();
-                if (this.lastActiveDate !== today) {
-                    if (this.lastActiveDate) {
-                        const lastDate = new Date(this.lastActiveDate);
-                        const diffTime = Math.abs(new Date(today) - lastDate);
-                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                        if (diffDays === 1) {
-                            this.streak += 1;
-                        } else if (diffDays > 2) {
-                            this.streak = 1;
-                        }
-                    } else {
-                        this.streak = 1;
-                    }
-                    this.lastActiveDate = today;
-                    localStorage.setItem('bb_streak', this.streak);
-                    localStorage.setItem('bb_last_date', this.lastActiveDate);
-                }
-            }
-
-            saveProgress() {
-                localStorage.setItem('bb_completed_lessons', JSON.stringify(this.completedLessons));
-                localStorage.setItem('bb_current_track', this.currentTrack);
-                this.updateDashboardStats();
-            }
-
-            updateDashboardStats() {
-                document.getElementById('stat-streak').innerText = this.streak;
-                document.getElementById('stat-completed').innerText = this.completedLessons.length;
-                
-                // Calculate overall progress across 12 total lessons (6 weeks * 2 lessons approx = 12)
-                const totalLessons = 12;
-                const completedCount = this.completedLessons.length;
-                const percent = Math.min(100, Math.round((completedCount / totalLessons) * 100));
-                document.getElementById('stat-progress').innerText = percent;
-
-                // Update track card badges on home
-                const nepaliCompleted = this.completedLessons.filter(id => id.startsWith('ne_')).length;
-                const cantoneseCompleted = this.completedLessons.filter(id => id.startsWith('ca_')).length;
-                
-                const nepaliPct = Math.round((nepaliCompleted / 12) * 100);
-                const cantonesePct = Math.round((cantoneseCompleted / 12) * 100);
-
-                const nepEl = document.getElementById('nepali-track-progress');
-                if (nepEl) nepEl.innerText = `Progress: ${nepaliPct}% (${nepaliCompleted}/12)`;
-
-                const cantEl = document.getElementById('cantonese-track-progress');
-                if (cantEl) cantEl.innerText = `Progress: ${cantonesePct}% (${cantoneseCompleted}/12)`;
-
-                // Update nav badge
-                const navBadge = document.getElementById('nav-track-name');
-                if (navBadge) {
-                    navBadge.innerText = this.currentTrack === 'nepali' ? '🇳🇵 Nepali Track (Husband)' : '🇭🇰 Cantonese Track (Wife)';
-                }
-            }
-
-            switchView(viewName) {
-                document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
-                const targetView = document.getElementById(`view-${viewName}`);
-                if (targetView) targetView.classList.remove('hidden');
-                this.currentView = viewName;
-                window.scrollTo(0, 0);
-
-                if (viewName === 'home') {
-                    this.updateDashboardStats();
-                } else if (viewName === 'curriculum') {
-                    this.renderCurriculum();
-                } else if (viewName === 'games') {
-                    document.getElementById('game-track-select').value = this.currentTrack;
-                    this.showGameMenu();
-                }
-            }
-
-            selectTrack(trackKey) {
-                this.currentTrack = trackKey;
-                this.saveProgress();
-                this.openCurriculum();
-            }
-
-            openCurriculum() {
-                this.switchView('curriculum');
-            }
-
-            renderCurriculum() {
-                const data = CURRICULUM_DATA[this.currentTrack];
-                document.getElementById('curriculum-title').innerText = data.title;
-                document.getElementById('curriculum-subtitle').innerText = data.subtitle;
-
-                const trackLessonsCount = data.weeks.reduce((acc, w) => acc + w.lessons.length, 0);
-                const completedInTrack = this.completedLessons.filter(id => id.startsWith(this.currentTrack === 'nepali' ? 'ne_' : 'ca_')).length;
-                const trackPct = Math.round((completedInTrack / trackLessonsCount) * 100);
-
-                document.getElementById('track-progress-bar').style.width = `${trackPct}%`;
-                document.getElementById('track-progress-text').innerText = `${trackPct}% Completed`;
-
-                const container = document.getElementById('weeks-container');
-                container.innerHTML = '';
-
-                data.weeks.forEach(week => {
-                    const isWeekComplete = week.lessons.every(l => this.completedLessons.includes(l.id));
-                    
-                    const weekDiv = document.createElement('div');
-                    weekDiv.className = 'bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden';
-                    
-                    let lessonsHtml = week.lessons.map(lesson => {
-                        const isDone = this.completedLessons.includes(lesson.id);
-                        return `
-                            <div onclick="app.openLesson('${lesson.id}')" class="p-4 sm:px-6 hover:bg-slate-50 transition flex items-center justify-between cursor-pointer border-t border-slate-100">
-                                <div class="flex items-center space-x-3">
-                                    <div class="w-8 h-8 rounded-full ${isDone ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'} flex items-center justify-center text-xs font-bold">
-                                        <i class="fa-solid ${isDone ? 'fa-check' : 'fa-book'}"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-semibold text-sm sm:text-base text-slate-800">${lesson.title}</h4>
-                                        <p class="text-xs text-slate-500">${lesson.vocab.length} survival phrases & vocabulary</p>
-                                    </div>
-                                </div>
-                                <span class="text-xs font-semibold px-3 py-1 bg-slate-100 text-slate-600 rounded-lg group-hover:bg-brand-50 group-hover:text-brand-700 transition">
-                                    Study <i class="fa-solid fa-arrow-right ml-1"></i>
-                                </span>
-                            </div>
-                        `;
-                    }).join('');
-
-                    weekDiv.innerHTML = `
-                        <div class="bg-slate-50 p-4 sm:px-6 border-b border-slate-200 flex justify-between items-center">
-                            <div>
-                                <span class="text-xs font-bold uppercase tracking-wider text-brand-600">Week ${week.week}</span>
-                                <h3 class="font-bold text-base sm:text-lg text-slate-800">${week.title}</h3>
-                                <p class="text-xs text-slate-500">${week.description}</p>
-                            </div>
-                            ${isWeekComplete ? '<span class="px-2.5 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full"><i class="fa-solid fa-trophy mr-1"></i> Completed</span>' : ''}
-                        </div>
-                        <div>${lessonsHtml}</div>
-                    `;
-                    container.appendChild(weekDiv);
-                });
-            }
-
-            findLessonById(lessonId) {
-                const data = CURRICULUM_DATA[this.currentTrack];
-                for (const week of data.weeks) {
-                    for (const lesson of week.lessons) {
-                        if (lesson.id === lessonId) return lesson;
-                    }
-                }
-                return null;
-            }
-
-            openLesson(lessonId) {
-                this.currentLessonId = lessonId;
-                const lesson = this.findLessonById(lessonId);
-                if (!lesson) return;
-
-                document.getElementById('lesson-header-title').innerText = lesson.title;
-                document.getElementById('lesson-header-desc').innerText = `Track: ${CURRICULUM_DATA[this.currentTrack].title}`;
-
-                const isDone = this.completedLessons.includes(lessonId);
-                const btn = document.getElementById('lesson-complete-btn');
-                if (isDone) {
-                    btn.className = 'px-4 py-2 bg-emerald-50 text-emerald-700 font-semibold rounded-xl text-sm transition border border-emerald-200';
-                    btn.innerHTML = '<i class="fa-solid fa-circle-check mr-1.5"></i> Completed';
-                } else {
-                    btn.className = 'px-4 py-2 bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 font-semibold rounded-xl text-sm transition border border-slate-200';
-                    btn.innerHTML = '<i class="fa-regular fa-circle mr-1.5"></i> Mark Complete';
-                }
-
-                const vocabContainer = document.getElementById('vocab-cards-container');
-                vocabContainer.innerHTML = '';
-
-                lesson.vocab.forEach((item, index) => {
-                    const card = document.createElement('div');
-                    card.className = 'bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between space-y-4';
-                    card.innerHTML = `
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <span class="text-xs font-bold text-slate-400">Phrase #${index + 1}</span>
-                                <h3 class="text-2xl font-bold text-slate-800 mt-1">${item.target}</h3>
-                                <p class="text-sm font-semibold text-brand-600 mt-0.5"><i class="fa-solid fa-volume-high text-xs mr-1"></i> ${item.phonetic}</p>
-                            </div>
-                            <button onclick="app.speak('${item.target.replace(/'/g, "\\'")}', '${CURRICULUM_DATA[this.currentTrack].langCode}')" class="w-10 h-10 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 flex items-center justify-center transition shadow-sm" title="Listen Audio">
-                                <i class="fa-solid fa-volume-high"></i>
-                            </button>
-                        </div>
-                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide">English Meaning</p>
-                            <p class="text-base font-bold text-slate-800">${item.english}</p>
-                            ${item.note ? `<p class="text-xs text-slate-500 mt-1 italic"><i class="fa-solid fa-circle-info mr-1 text-brand-500"></i> ${item.note}</p>` : ''}
-                        </div>
-                    `;
-                    vocabContainer.appendChild(card);
-                });
-
-                this.switchView('lesson');
-            }
-
-            toggleCurrentLessonComplete() {
-                const index = this.completedLessons.indexOf(this.currentLessonId);
-                if (index > -1) {
-                    this.completedLessons.splice(index, 1);
-                    this.showToast("Lesson marked incomplete.");
-                } else {
-                    this.completedLessons.push(this.currentLessonId);
-                    this.showToast("Lesson completed! 🎉 Great job!");
-                }
-                this.saveProgress();
-                this.openLesson(this.currentLessonId);
-            }
-
-            openResetModal() {
-                document.getElementById('reset-modal').classList.remove('hidden');
-            }
-
-            closeResetModal() {
-                document.getElementById('reset-modal').classList.add('hidden');
-            }
-
-            confirmReset() {
-                localStorage.clear();
-                this.completedLessons = [];
-                this.streak = 1;
-                this.currentTrack = 'nepali';
-                this.closeResetModal();
-                this.switchView('home');
-                this.showToast("Progress has been reset.");
-            }
-
-            updateGameTrackSelection() {
-                const sel = document.getElementById('game-track-select').value;
-                this.currentTrack = sel;
-                this.saveProgress();
-            }
-
-            showGameMenu() {
-                document.getElementById('game-menu').classList.remove('hidden');
-                document.getElementById('game-active-container').classList.add('hidden');
-            }
-
-            getAllVocabForCurrentTrack() {
-                const data = CURRICULUM_DATA[this.currentTrack];
-                let all = [];
-                data.weeks.forEach(w => {
-                    w.lessons.forEach(l => {
-                        all = all.concat(l.vocab);
-                    });
-                });
-                return all;
-            }
-
-            startMatchGame() {
-                const vocabList = this.getAllVocabForCurrentTrack();
-                if (vocabList.length < 4) {
-                    this.showToast("Not enough vocabulary for this game.");
-                    return;
-                }
-                // Pick 4 random items
-                const shuffled = [...vocabList].sort(() => 0.5 - Math.random());
-                const activeItems = shuffled.slice(0, 4);
-
-                document.getElementById('game-menu').classList.add('hidden');
-                const container = document.getElementById('game-active-container');
-                container.classList.remove('hidden');
-
-                let targetIndex = 0;
-                let score = 0;
-
-                const renderMatchRound = () => {
-                    if (targetIndex >= activeItems.length) {
-                        container.innerHTML = `
-                            <div class="text-center py-10 space-y-4">
-                                <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl mx-auto">
-                                    <i class="fa-solid fa-trophy"></i>
-                                </div>
-                                <h3 class="text-2xl font-bold text-slate-800">Match Game Completed!</h3>
-                                <p class="text-slate-600">You scored ${score} / ${activeItems.length} correct matches.</p>
-                                <div class="flex justify-center space-x-3 pt-4">
-                                    <button onclick="app.startMatchGame()" class="px-6 py-2.5 bg-purple-600 text-white font-semibold rounded-xl text-sm shadow">Play Again</button>
-                                    <button onclick="app.showGameMenu()" class="px-6 py-2.5 bg-slate-100 text-slate-700 font-semibold rounded-xl text-sm">Back to Games</button>
-                                </div>
-                            </div>
-                        `;
-                        return;
-                    }
-
-                    const current = activeItems[targetIndex];
-                    // Generate 3 random wrong English meanings
-                    const wrongPool = vocabList.filter(v => v.english !== current.english);
-                    const shuffledWrong = [...wrongPool].sort(() => 0.5 - Math.random()).slice(0, 3);
-                    const choices = [...shuffledWrong, current].sort(() => 0.5 - Math.random());
-
-                    container.innerHTML = `
-                        <div class="flex justify-between items-center mb-6">
-                            <button onclick="app.showGameMenu()" class="text-xs font-semibold text-slate-500 hover:text-slate-800"><i class="fa-solid fa-arrow-left mr-1"></i> Exit Game</button>
-                            <span class="text-xs font-bold px-3 py-1 bg-purple-50 text-purple-700 rounded-full">Match Question ${targetIndex + 1} of ${activeItems.length}</span>
-                        </div>
-                        <div class="text-center space-y-3 mb-8">
-                            <span class="text-xs uppercase font-bold text-slate-400">Match this phrase</span>
-                            <h3 class="text-4xl font-bold text-slate-800">${current.target}</h3>
-                            <p class="text-sm font-semibold text-brand-600">${current.phonetic}</p>
-                            <button onclick="app.speak('${current.target.replace(/'/g, "\\'")}', '${CURRICULUM_DATA[this.currentTrack].langCode}')" class="inline-flex items-center px-3 py-1.5 bg-amber-50 text-amber-700 rounded-lg text-xs font-semibold hover:bg-amber-100 transition">
-                                <i class="fa-solid fa-volume-high mr-1.5"></i> Listen Pronunciation
-                            </button>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl mx-auto">
-                            ${choices.map((choice, i) => `
-                                <button onclick="app.handleMatchAnswer('${choice.english}', '${current.english}', this)" class="match-choice-btn p-4 rounded-xl border border-slate-200 bg-white hover:border-purple-500 hover:bg-purple-50/50 font-semibold text-slate-700 text-left transition shadow-sm">
-                                    ${choice.english}
-                                </button>
-                            `).join('')}
-                        </div>
-                    `;
-                };
-
-                // Attach answer handler
-                window.app.handleMatchAnswer = (selected, correct, btnEl) => {
-                    const allBtns = container.querySelectorAll('.match-choice-btn');
-                    allBtns.forEach(b => b.disabled = true);
-                    if (selected === correct) {
-                        btnEl.className = 'match-choice-btn p-4 rounded-xl border border-emerald-500 bg-emerald-50 font-semibold text-emerald-800 text-left transition shadow-sm';
-                        score++;
-                        this.showToast("Correct match!");
-                    } else {
-                        btnEl.className = 'match-choice-btn p-4 rounded-xl border border-rose-500 bg-rose-50 font-semibold text-rose-800 text-left transition shadow-sm';
-                        allBtns.forEach(b => {
-                            if (b.innerText.trim() === correct.trim()) {
-                                b.className = 'match-choice-btn p-4 rounded-xl border border-emerald-500 bg-emerald-50 font-semibold text-emerald-800 text-left transition shadow-sm';
-                            }
-                        });
-                    }
-                    setTimeout(() => {
-                        targetIndex++;
-                        renderMatchRound();
-                    }, 1200);
-                };
-
-                renderMatchRound();
-            }
-
-            startListenGame() {
-                const vocabList = this.getAllVocabForCurrentTrack();
-                if (vocabList.length < 4) {
-                    this.showToast("Not enough vocabulary for this game.");
-                    return;
-                }
-                const shuffled = [...vocabList].sort(() => 0.5 - Math.random());
-                const activeItems = shuffled.slice(0, 5);
-
-                document.getElementById('game-menu').classList.add('hidden');
-                const container = document.getElementById('game-active-container');
-                container.classList.remove('hidden');
-
-                let currentIndex = 0;
-                let score = 0;
-
-                const renderListenRound = () => {
-                    if (currentIndex >= activeItems.length) {
-                        container.innerHTML = `
-                            <div class="text-center py-10 space-y-4">
-                                <div class="w-16 h-16 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center text-3xl mx-auto">
-                                    <i class="fa-solid fa-headphones"></i>
-                                </div>
-                                <h3 class="text-2xl font-bold text-slate-800">Listen & Choose Completed!</h3>
-                                <p class="text-slate-600">You scored ${score} / ${activeItems.length} correct.</p>
-                                <div class="flex justify-center space-x-3 pt-4">
-                                    <button onclick="app.startListenGame()" class="px-6 py-2.5 bg-teal-600 text-white font-semibold rounded-xl text-sm shadow">Play Again</button>
-                                    <button onclick="app.showGameMenu()" class="px-6 py-2.5 bg-slate-100 text-slate-700 font-semibold rounded-xl text-sm">Back to Games</button>
-                                </div>
-                            </div>
-                        `;
-                        return;
-                    }
-
-                    const current = activeItems[currentIndex];
-                    // Auto play audio prompt
-                    setTimeout(() => {
-                        this.speak(current.target, CURRICULUM_DATA[this.currentTrack].langCode);
-                    }, 400);
-
-                    const wrongPool = vocabList.filter(v => v.english !== current.english);
-                    const shuffledWrong = [...wrongPool].sort(() => 0.5 - Math.random()).slice(0, 3);
-                    const choices = [...shuffledWrong, current].sort(() => 0.5 - Math.random());
-
-                    container.innerHTML = `
-                        <div class="flex justify-between items-center mb-6">
-                            <button onclick="app.showGameMenu()" class="text-xs font-semibold text-slate-500 hover:text-slate-800"><i class="fa-solid fa-arrow-left mr-1"></i> Exit Game</button>
-                            <span class="text-xs font-bold px-3 py-1 bg-teal-50 text-teal-700 rounded-full">Question ${currentIndex + 1} of ${activeItems.length}</span>
-                        </div>
-                        <div class="text-center space-y-4 mb-8">
-                            <span class="text-xs uppercase font-bold text-slate-400">Listen & Guess English Meaning</span>
-                            <div class="w-20 h-20 bg-teal-50 text-teal-600 rounded-full flex items-center justify-center text-3xl mx-auto shadow-inner cursor-pointer hover:bg-teal-100 transition" onclick="app.speak('${current.target.replace(/'/g, "\\'")}', '${CURRICULUM_DATA[this.currentTrack].langCode}')">
-                                <i class="fa-solid fa-volume-high"></i>
-                            </div>
-                            <p class="text-xs text-slate-500 italic">Click speaker icon to replay audio</p>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl mx-auto">
-                            ${choices.map((choice, i) => `
-                                <button onclick="app.handleListenAnswer('${choice.english}', '${current.english}', this)" class="listen-choice-btn p-4 rounded-xl border border-slate-200 bg-white hover:border-teal-500 hover:bg-teal-50/50 font-semibold text-slate-700 text-left transition shadow-sm">
-                                    ${choice.english}
-                                </button>
-                            `).join('')}
-                        </div>
-                    `;
-                };
-
-                window.app.handleListenAnswer = (selected, correct, btnEl) => {
-                    const allBtns = container.querySelectorAll('.listen-choice-btn');
-                    allBtns.forEach(b => b.disabled = true);
-                    if (selected === correct) {
-                        btnEl.className = 'listen-choice-btn p-4 rounded-xl border border-emerald-500 bg-emerald-50 font-semibold text-emerald-800 text-left transition shadow-sm';
-                        score++;
-                        this.showToast("Correct! Great listening!");
-                    } else {
-                        btnEl.className = 'listen-choice-btn p-4 rounded-xl border border-rose-500 bg-rose-50 font-semibold text-rose-800 text-left transition shadow-sm';
-                        allBtns.forEach(b => {
-                            if (b.innerText.trim() === correct.trim()) {
-                                b.className = 'listen-choice-btn p-4 rounded-xl border border-emerald-500 bg-emerald-50 font-semibold text-emerald-800 text-left transition shadow-sm';
-                            }
-                        });
-                    }
-                    setTimeout(() => {
-                        currentIndex++;
-                        renderListenRound();
-                    }, 1200);
-                };
-
-                renderListenRound();
-            }
-
-            startQuizForCurrentLesson() {
-                this.switchView('games');
-                this.startMatchGame();
+            if (viewName === 'home') {
+                document.getElementById('header-nav').classList.add('hidden');
+            } else {
+                document.getElementById('header-nav').classList.remove('hidden');
             }
         }
 
-        // Initialize application on DOM load
-        const app = new BilingualBridgeApp();
-        window.app = app;
-        
-        // Initial dashboard stats update
-        app.updateDashboardStats();
+        function selectTrack(track) {
+            currentTrack = track;
+            localStorage.setItem('bb_track', track);
+            completedWeeks = JSON.parse(localStorage.getItem('bb_completed_' + track) || '[]');
+            showDashboard();
+        }
+
+        function showDashboard() {
+            const trackData = curriculum[currentTrack];
+            document.getElementById('track-avatar').textContent = trackData.avatar;
+            document.getElementById('track-title').textContent = trackData.title;
+            document.getElementById('track-badge').textContent = trackData.badge;
+            document.getElementById('stat-streak').textContent = `🔥 ${streak}`;
+            document.getElementById('stat-completed').textContent = `${completedWeeks.length}/6`;
+
+            // Render Weeks
+            const container = document.getElementById('weeks-container');
+            container.innerHTML = '';
+
+            trackData.weeks.forEach(w => {
+                const isCompleted = completedWeeks.includes(w.week);
+                const card = document.createElement('div');
+                card.className = `bg-white rounded-2xl p-5 border transition flex items-center justify-between ${isCompleted ? 'border-emerald-200 bg-emerald-50/20' : 'border-rose-100 hover:shadow-md'}`;
+                card.innerHTML = `
+                    <div class="flex items-center space-x-4">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm ${isCompleted ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-600'}">
+                            ${isCompleted ? '✓' : 'W' + w.week}
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-900 text-sm md:text-base">Week ${w.week}: ${w.title}</h4>
+                            <p class="text-xs text-gray-500 mt-0.5">${w.desc}</p>
+                        </div>
+                    </div>
+                    <button onclick="openLesson(${w.week})" class="px-4 py-2 text-xs font-semibold rounded-xl transition ${isCompleted ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-rose-600 text-white hover:bg-rose-700'}">
+                        ${isCompleted ? 'Review' : 'Start'}
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+
+            switchView('dashboard');
+        }
+
+        let activeLessonWeek = 1;
+        function openLesson(weekNum) {
+            activeLessonWeek = weekNum;
+            const trackData = curriculum[currentTrack];
+            const lesson = trackData.weeks.find(w => w.week === weekNum);
+
+            document.getElementById('lesson-week-badge').textContent = `Week ${lesson.week} Curriculum`;
+            document.getElementById('lesson-title').textContent = lesson.title;
+            document.getElementById('lesson-desc').textContent = lesson.desc;
+
+            const container = document.getElementById('phrases-container');
+            container.innerHTML = '';
+
+            lesson.phrases.forEach((p, idx) => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-xl p-4 border border-rose-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 shadow-sm';
+                card.innerHTML = `
+                    <div class="space-y-1">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-xl font-bold text-gray-900">${p.native}</span>
+                            <button onclick="speakText('${p.native.replace(/'/g, "\\'")}', '${currentTrack}')" class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center space-x-1 transition active:scale-95">
+                                <span>🔊 Pronounce</span>
+                            </button>
+                        </div>
+                        <p class="text-xs font-medium text-orange-600">Phonetic: ${p.phonetic}</p>
+                    </div>
+                    <div class="text-left md:text-right bg-gray-50 md:bg-transparent p-2 md:p-0 rounded-lg w-full md:w-auto">
+                        <span class="text-sm font-bold text-gray-800">${p.meaning}</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            switchView('lesson');
+        }
+
+        function completeCurrentWeek() {
+            if (!completedWeeks.includes(activeLessonWeek)) {
+                completedWeeks.push(activeLessonWeek);
+                localStorage.setItem('bb_completed_' + currentTrack, JSON.stringify(completedWeeks));
+                streak += 1;
+                localStorage.setItem('bb_streak', streak);
+            }
+            showDashboard();
+        }
+
+        // SPEECH SYNTHESIS ENGINE (Optimized for iOS Safari & Native Voices)
+        function speakText(text, track) {
+            if (!('speechSynthesis' in window)) {
+                alert("Speech synthesis is not supported in this browser.");
+                return;
+            }
+
+            // Cancel any ongoing speech
+            window.speechSynthesis.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 0.85; // slightly slower for clear learning
+
+            const voices = window.speechSynthesis.getVoices();
+            if (track === 'cantonese') {
+                utterance.lang = 'zh-HK';
+                const cantoneseVoice = voices.find(v => v.lang.includes('zh-HK') || v.lang.includes('yue'));
+                if (cantoneseVoice) utterance.voice = cantoneseVoice;
+            } else {
+                utterance.lang = 'ne-NP';
+                // Fallback to Hindi or general South Asian voice if Nepali isn't preinstalled on iOS
+                const nepaliVoice = voices.find(v => v.lang.includes('ne') || v.lang.includes('hi'));
+                if (nepaliVoice) utterance.voice = nepaliVoice;
+            }
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Force voice load on Safari iOS
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = () => {
+                window.speechSynthesis.getVoices();
+            };
+        }
+
+        // MINI-GAMES LOGIC
+        function startMiniGame(type) {
+            switchView('minigame');
+            const trackData = curriculum[currentTrack];
+            const allPhrases = trackData.weeks.flatMap(w => w.phrences || w.phrases);
+
+            if (type === 'flashcards') {
+                document.getElementById('game-header-title').textContent = "Match-the-Meaning Challenge";
+                const randomPhrase = allPhrases[Math.floor(Math.random() * allPhrases.length)];
+                
+                // Get 3 incorrect meanings
+                let incorrect = allPhrases.filter(p => p.meaning !== randomPhrase.meaning)
+                                          .sort(() => 0.5 - Math.random())
+                                          .slice(0, 3)
+                                          .map(p => p.meaning);
+                let options = [...incorrect, randomPhrase.meaning].sort(() => 0.5 - Math.random());
+
+                const content = document.getElementById('game-content');
+                content.innerHTML = `
+                    <div class="text-center space-y-4 max-w-md mx-auto">
+                        <span class="bg-rose-100 text-rose-700 text-xs font-bold px-3 py-1 rounded-full">Flashcard Quiz</span>
+                        <h3 class="text-3xl font-black text-gray-900">${randomPhrase.native}</h3>
+                        <p class="text-sm text-orange-600 font-medium">Phonetic: ${randomPhrase.phonetic}</p>
+                        <p class="text-xs text-gray-500">What is the correct English meaning?</p>
+                        <div class="grid grid-cols-1 gap-2.5 pt-2">
+                            ${options.map(opt => `
+                                <button onclick="checkGameAnswer('${opt === randomPhrase.meaning}')" class="w-full py-3 px-4 bg-gray-50 hover:bg-rose-50 hover:border-rose-300 border border-gray-200 rounded-xl text-sm font-semibold transition text-gray-800">
+                                    ${opt}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            } else if (type === 'audio') {
+                document.getElementById('game-header-title').textContent = "Listen & Choose Challenge";
+                const randomPhrase = allPhrases[Math.floor(Math.random() * allPhrases.length)];
+                let incorrect = allPhrases.filter(p => p.native !== randomPhrase.native)
+                                          .sort(() => 0.5 - Math.random())
+                                          .slice(0, 3)
+                                          .map(p => p.native);
+                let options = [...incorrect, randomPhrase.native].sort(() => 0.5 - Math.random());
+
+                const content = document.getElementById('game-content');
+                content.innerHTML = `
+                    <div class="text-center space-y-4 max-w-md mx-auto">
+                        <span class="bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full">Audio Prompt Test</span>
+                        <div class="py-6">
+                            <button onclick="speakText('${randomPhrase.native.replace(/'/g, "\\'")}', '${currentTrack}')" class="w-20 h-20 bg-rose-600 text-white rounded-full mx-auto flex items-center justify-center text-3xl shadow-lg hover:bg-rose-700 transition active:scale-95">
+                                🔊
+                            </button>
+                            <p class="text-xs text-gray-500 mt-3">Tap speaker to hear audio, then select the matching script below</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            ${options.map(opt => `
+                                <button onclick="checkGameAnswer('${opt === randomPhrase.native}')" class="py-3 px-3 bg-gray-50 hover:bg-rose-50 hover:border-rose-300 border border-gray-200 rounded-xl text-base font-bold transition text-gray-800">
+                                    ${opt}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                // Auto play audio on load
+                setTimeout(() => speakText(randomPhrase.native, currentTrack), 400);
+            }
+        }
+
+        function checkGameAnswer(isCorrect) {
+            const content = document.getElementById('game-content');
+            if (isCorrect === 'true') {
+                content.innerHTML = `
+                    <div class="text-center space-y-4 py-8">
+                        <span class="text-5xl">🎉</span>
+                        <h3 class="text-2xl font-bold text-emerald-600">Correct! Great job!</h3>
+                        <p class="text-sm text-gray-600">Keep up the momentum for November 2026.</p>
+                        <div class="pt-4 flex justify-center space-x-3">
+                            <button onclick="startMiniGame('flashcards')" class="bg-rose-600 text-white px-5 py-2.5 rounded-xl text-xs font-semibold shadow">Play Again</button>
+                            <button onclick="switchView('dashboard')" class="bg-gray-100 text-gray-700 px-5 py-2.5 rounded-xl text-xs font-semibold">Back to Dashboard</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                content.innerHTML = `
+                    <div class="text-center space-y-4 py-8">
+                        <span class="text-5xl">💡</span>
+                        <h3 class="text-2xl font-bold text-rose-600">Not quite right!</h3>
+                        <p class="text-sm text-gray-600">Practice makes perfect. Try another round.</p>
+                        <div class="pt-4 flex justify-center space-x-3">
+                            <button onclick="startMiniGame('flashcards')" class="bg-rose-600 text-white px-5 py-2.5 rounded-xl text-xs font-semibold shadow">Try Again</button>
+                            <button onclick="switchView('dashboard')" class="bg-gray-100 text-gray-700 px-5 py-2.5 rounded-xl text-xs font-semibold">Back to Dashboard</button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
     </script>
 </body>
 </html>
